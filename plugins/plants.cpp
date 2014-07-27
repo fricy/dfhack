@@ -97,7 +97,7 @@ static command_result immolations (color_ostream &out, do_what what, bool shrubs
         int32_t x,y,z;
         if(Gui::getCursorCoords(x,y,z))
         {
-            auto block = Maps::getTileBlock(x,y,z);
+            auto block = Maps::getBlockColumn(x / 16,y / 16);
             vector<df::plant *> *alltrees = block ? &block->plants : NULL;
             if(alltrees)
             {
@@ -182,7 +182,7 @@ command_result df_grow (color_ostream &out, vector <string> & parameters)
     int32_t x,y,z;
     if(Gui::getCursorCoords(x,y,z))
     {
-        auto block = Maps::getTileBlock(x,y,z);
+        auto block = Maps::getBlockColumn(x / 16,y / 16);
         vector<df::plant *> *alltrees = block ? &block->plants : NULL;
         if(alltrees)
         {
@@ -296,10 +296,6 @@ command_result df_createplant (color_ostream &out, vector <string> & parameters)
     plant->pos.y = y;
     plant->pos.z = z;
     plant->update_order = rand() % 10;
-    plant->temperature_tile_tick = -1;
-    plant->temperature_tile = 60001;
-    plant->min_safe_temp = 9900;
-    plant->max_safe_temp = 60001;
 
     world->plants.all.push_back(plant);
     switch (plant->flags.whole & 3)
@@ -309,7 +305,10 @@ command_result df_createplant (color_ostream &out, vector <string> & parameters)
     case 2: world->plants.shrub_dry.push_back(plant); break;
     case 3: world->plants.shrub_wet.push_back(plant); break;
     }
-    map->plants.push_back(plant);
+	
+	df::map_block_column *mapColumn = Maps::getBlockColumn(x / 16, y / 16);
+	
+    mapColumn->plants.push_back(plant);
     if (plant->flags.bits.is_shrub)
         map->tiletype[tx][ty] = tiletype::Shrub;
     else
