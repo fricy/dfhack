@@ -737,7 +737,7 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
                 // and we can check visibility more easily here
                 if (showPlants)
                 {
-                    auto block = Maps::getBlock(b_x,b_y,z);
+                    auto block = Maps::getBlockColumn(b_x,b_y);
                     vector<df::plant *> *plants = block ? &block->plants : NULL;
                     if(plants)
                     {
