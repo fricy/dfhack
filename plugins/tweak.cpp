@@ -25,10 +25,10 @@
 #include "df/historical_entity.h"
 #include "df/historical_figure.h"
 #include "df/historical_figure_info.h"
-#include "df/assumed_identity.h"
+#include "df/identity.h"
 #include "df/language_name.h"
-#include "df/death_info.h"
-#include "df/criminal_case.h"
+#include "df/incident.h"
+#include "df/crime.h"
 #include "df/unit_inventory_item.h"
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/viewscreen_layer_unit_actionst.h"
@@ -1211,13 +1211,13 @@ static command_result tweak(color_ostream &out, vector <string> &parameters)
         if (!unit)
             return CR_FAILURE;
 
-        auto death = df::death_info::find(unit->counters.death_id);
+        auto death = df::incident::find(unit->counters.death_id);
 
         if (death)
         {
             death->flags.bits.discovered = true;
 
-            auto crime = df::criminal_case::find(death->crime_id);
+            auto crime = df::crime::find(death->crime_id);
             if (crime)
                 crime->flags.bits.discovered = true;
         }
