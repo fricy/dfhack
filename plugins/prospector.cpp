@@ -744,10 +744,15 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
                         for (PlantList::const_iterator it = plants->begin(); it != plants->end(); it++)
                         {
                             const df::plant & plant = *(*it);
+<<<<<<< HEAD
 							if(plant.pos.z != z)
 							{
 								continue;
 							}
+=======
+                            if (plant.pos.z != z)
+                                continue;
+>>>>>>> 55ebca4a7a455c3cd7fac3246fe60691c10ef46a
                             df::coord2d loc(plant.pos.x, plant.pos.y);
                             loc = loc % 16;
                             if (showHidden || !b->DesignationAt(loc).bits.hidden)

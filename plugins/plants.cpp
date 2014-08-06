@@ -20,10 +20,11 @@ using std::string;
 using namespace DFHack;
 using df::global::world;
 
-const uint32_t sapling_to_tree_threshold = 120 * 28 * 12 * 3; // 3 years
+const uint32_t sapling_to_tree_threshold = 120 * 28 * 12 * 3 - 1; // 3 years minus 1 - let the game handle the actual growing-up
 
 DFHACK_PLUGIN("plants");
 
+/* Immolate/Extirpate no longer work in 0.40
 enum do_what
 {
     do_immolate,
@@ -59,12 +60,13 @@ static bool getoptions( vector <string> & parameters, bool & shrubs, bool & tree
     return true;
 }
 
-/**
- * Book of Immolations, chapter 1, verse 35:
- * Armok emerged from the hellish depths and beheld the sunny realms for the first time.
- * And he cursed the plants and trees for their bloodless wood, turning them into ash and smoldering ruin.
- * Armok was pleased and great temples were built by the dwarves, for they shared his hatred for trees and plants.
- */
+//
+// Book of Immolations, chapter 1, verse 35:
+// Armok emerged from the hellish depths and beheld the sunny realms for the first time.
+// And he cursed the plants and trees for their bloodless wood, turning them into ash and smoldering ruin.
+// Armok was pleased and great temples were built by the dwarves, for they shared his hatred for trees and plants.
+//
+
 static command_result immolations (color_ostream &out, do_what what, bool shrubs, bool trees)
 {
     CoreSuspender suspend;
@@ -90,37 +92,36 @@ static command_result immolations (color_ostream &out, do_what what, bool shrubs
                 destroyed ++;
             }
         }
-        out.print("Praise Armok!\n");
+        out.print("Praise Armok! %i plants destroyed.\n", destroyed);
     }
     else
     {
         int32_t x,y,z;
         if(Gui::getCursorCoords(x,y,z))
         {
+<<<<<<< HEAD
             auto block = Maps::getBlockColumn(x / 16,y / 16);
             vector<df::plant *> *alltrees = block ? &block->plants : NULL;
             if(alltrees)
+=======
+            bool didit = false;
+            for(size_t i = 0; i < world->plants.all.size(); i++)
+>>>>>>> 55ebca4a7a455c3cd7fac3246fe60691c10ef46a
             {
-                bool didit = false;
-                for(size_t i = 0 ; i < alltrees->size(); i++)
+                df::plant *tree = world->plants.all[i];
+                if(tree->pos.x == x && tree->pos.y == y && tree->pos.z == z)
                 {
-                    df::plant * tree = alltrees->at(i);
-                    if(tree->pos.x == x && tree->pos.y == y && tree->pos.z == z)
-                    {
-                        if(what == do_immolate)
-                            tree->damage_flags.bits.is_burning = true;
-                        tree->hitpoints = 0;
-                        didit = true;
-                        break;
-                    }
+                    if(what == do_immolate)
+                        tree->damage_flags.bits.is_burning = true;
+                    tree->hitpoints = 0;
+                    didit = true;
+                    break;
                 }
-                /*
-                if(!didit)
-                {
-                    cout << "----==== There's NOTHING there! ====----" << endl;
-                }
-                */
             }
+            if(didit)
+                out.print("Praise Armok! Selected plant destroyed.\n");
+            else
+               out.printerr("No plant found at specified location!\n");
         }
         else
         {
@@ -157,16 +158,16 @@ command_result df_immolate (color_ostream &out, vector <string> & parameters, do
 
     return CR_OK;
 }
-
+*/
 command_result df_grow (color_ostream &out, vector <string> & parameters)
 {
     for(size_t i = 0; i < parameters.size();i++)
     {
         if(parameters[i] == "help" || parameters[i] == "?")
         {
-            out << "Usage:\n"
+            out.print("Usage:\n"
                 "This command turns all living saplings on the map into full-grown trees.\n"
-                "With active cursor, work on the targetted one only.\n";
+                "With active cursor, work on the targetted one only.\n");
             return CR_OK;
         }
     }
@@ -180,30 +181,32 @@ command_result df_grow (color_ostream &out, vector <string> & parameters)
     }
     MapExtras::MapCache map;
     int32_t x,y,z;
+    int grown = 0;
     if(Gui::getCursorCoords(x,y,z))
     {
+<<<<<<< HEAD
         auto block = Maps::getBlockColumn(x / 16,y / 16);
         vector<df::plant *> *alltrees = block ? &block->plants : NULL;
         if(alltrees)
+=======
+        for(size_t i = 0; i < world->plants.all.size(); i++)
+>>>>>>> 55ebca4a7a455c3cd7fac3246fe60691c10ef46a
         {
-            for(size_t i = 0 ; i < alltrees->size(); i++)
+            df::plant * tree = world->plants.all[i];
+            if(tree->pos.x == x && tree->pos.y == y && tree->pos.z == z)
             {
-                df::plant * tree = alltrees->at(i);
-                if(tree->pos.x == x && tree->pos.y == y && tree->pos.z == z)
+                if(tileShape(map.tiletypeAt(DFCoord(x,y,z))) == tiletype_shape::SAPLING &&
+                    tileSpecial(map.tiletypeAt(DFCoord(x,y,z))) != tiletype_special::DEAD)
                 {
-                    if(tileShape(map.tiletypeAt(DFCoord(x,y,z))) == tiletype_shape::SAPLING &&
-                        tileSpecial(map.tiletypeAt(DFCoord(x,y,z))) != tiletype_special::DEAD)
-                    {
-                        tree->grow_counter = sapling_to_tree_threshold;
-                    }
-                    break;
+                    tree->grow_counter = sapling_to_tree_threshold;
+                    grown++;
                 }
+                break;
             }
         }
     }
     else
     {
-        int grown = 0;
         for(size_t i = 0 ; i < world->plants.all.size(); i++)
         {
             df::plant *p = world->plants.all[i];
@@ -211,9 +214,14 @@ command_result df_grow (color_ostream &out, vector <string> & parameters)
             if(!p->flags.bits.is_shrub && tileShape(ttype) == tiletype_shape::SAPLING && tileSpecial(ttype) != tiletype_special::DEAD)
             {
                 p->grow_counter = sapling_to_tree_threshold;
+                grown++;
             }
         }
     }
+    if (grown)
+        out.print("%i plants grown.\n", grown);
+    else
+        out.printerr("No plant(s) found!\n");
 
     return CR_OK;
 }
@@ -222,10 +230,10 @@ command_result df_createplant (color_ostream &out, vector <string> & parameters)
 {
     if ((parameters.size() != 1) || (parameters[0] == "help" || parameters[0] == "?"))
     {
-        out << "Usage:\n"
+        out.print("Usage:\n"
             "Create a new plant at the cursor.\n"
             "Specify the type of plant to create by its raw ID (e.g. TOWER_CAP or MUSHROOM_HELMET_PLUMP).\n"
-            "Only shrubs and saplings can be placed, and they must be located on a dirt or grass floor.\n";
+            "Only shrubs and saplings can be placed, and they must be located on a dirt or grass floor.\n");
         return CR_OK;
     }
 
@@ -244,7 +252,8 @@ command_result df_createplant (color_ostream &out, vector <string> & parameters)
         return CR_FAILURE;
     }
     df::map_block *map = Maps::getTileBlock(x, y, z);
-    if (!map)
+    df::map_block_column *col = Maps::getBlockColumn((x / 48) * 3, (y / 48) * 3);
+    if (!map || !col)
     {
         out.printerr("Invalid location selected!\n");
         return CR_FAILURE;
@@ -305,10 +314,14 @@ command_result df_createplant (color_ostream &out, vector <string> & parameters)
     case 2: world->plants.shrub_dry.push_back(plant); break;
     case 3: world->plants.shrub_wet.push_back(plant); break;
     }
+<<<<<<< HEAD
 	
 	df::map_block_column *mapColumn = Maps::getBlockColumn(x / 16, y / 16);
 	
     mapColumn->plants.push_back(plant);
+=======
+    col->plants.push_back(plant);
+>>>>>>> 55ebca4a7a455c3cd7fac3246fe60691c10ef46a
     if (plant->flags.bits.is_shrub)
         map->tiletype[tx][ty] = tiletype::Shrub;
     else
@@ -325,6 +338,7 @@ command_result df_plant (color_ostream &out, vector <string> & parameters)
             parameters.erase(parameters.begin());
             return df_grow(out, parameters);
         } else
+/*
         if (parameters[0] == "immolate") {
             parameters.erase(parameters.begin());
             return df_immolate(out, parameters, do_immolate);
@@ -333,6 +347,7 @@ command_result df_plant (color_ostream &out, vector <string> & parameters)
             parameters.erase(parameters.begin());
             return df_immolate(out, parameters, do_extirpate);
         } else
+*/
         if (parameters[0] == "create") {
             parameters.erase(parameters.begin());
             return df_createplant(out, parameters);
@@ -346,8 +361,8 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
     commands.push_back(PluginCommand("plant", "Plant creation and removal.", df_plant, false,
         "Command to create, grow or remove plants on the map. For more details, check the subcommand help :\n"
         "plant grow help      - Grows saplings into trees.\n"
-        "plant immolate help  - Set plants on fire.\n"
-        "plant extirpate help - Kill plants.\n"
+//        "plant immolate help  - Set plants on fire.\n"
+//        "plant extirpate help - Kill plants.\n"
         "plant create help    - Create a new plant.\n"));
 
     return CR_OK;
