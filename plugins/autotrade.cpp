@@ -421,8 +421,8 @@ struct trade_hook : public df::viewscreen_dwarfmodest
         auto dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
-        int y = 24;
-        OutputToggleString(x, y, "Auto trade", "Shift-T", monitor.isMonitored(sp), true, left_margin);
+        int y = dims.y2 - 4;
+        OutputToggleString(x, y, "Auto trade", "T", monitor.isMonitored(sp), true, left_margin, COLOR_WHITE, COLOR_LIGHTRED);
     }
 };
 
