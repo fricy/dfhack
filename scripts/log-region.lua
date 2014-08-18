@@ -31,7 +31,7 @@ else
                 --civ_ent.name
                 
                 write_gamelog('Loaded '..df.global.world.cur_savegame.save_dir..', '..fullname(worldname)..
-                  ' at coordinates ('..site.pos.x..','..site.pos.y..') '..NEWLINE..
+                  ' at coordinates ('..site.pos.x..','..site.pos.y..')'..NEWLINE..
                   'Loaded the fortress '..fullname(site)..
                   (fort_ent and ', colonized by the group '..fullname(fort_ent) or '')..
                   (civ_ent and ' of the civilization '..fullname(civ_ent) or '')..'.'..NEWLINE)
