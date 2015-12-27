@@ -121,8 +121,8 @@ command_result df_seedwatch(color_ostream &out, vector<string>& parameters)
     // if game mode isn't fortress mode
     if(gm.g_mode != game_mode::DWARF || !World::isFortressMode(gm.g_type))
     {
-        // just print the help
-        printHelp(out);
+        // don't just print the help
+        // printHelp(out);
         return CR_OK;
     }
 
