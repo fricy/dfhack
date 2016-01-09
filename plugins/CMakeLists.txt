@@ -6,7 +6,7 @@ if(BUILD_DFUSION)
     add_subdirectory (Dfusion)
 endif()
 
-OPTION(BUILD_STONESENSE "Build stonesense (needs a checkout first)." OFF)
+OPTION(BUILD_STONESENSE "Build stonesense (needs a checkout first)." ON)
 if(BUILD_STONESENSE)
     add_subdirectory (stonesense)
 endif()
